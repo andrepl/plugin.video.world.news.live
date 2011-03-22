@@ -16,12 +16,28 @@ __plugin__ = "World News Live"
 __author__ = 'Andre <andrepleblanc@gmail.com>'
 __url__ = 'http://github.com/andrepl/plugin.video.world.news.live/'
 __date__ = '03-21-2011'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __settings__ = xbmcaddon.Addon(id='plugin.video.world.news.live')
 
 
 
 class WorldNewsLivePlugin(object):
+        
+    
+    def connect_to_db(self):
+        path = xbmc.translatePath('special://profile/addon_data/plugin.video.world.news.live/')
+        if not os.path.exists(path):
+            os.makedirs(path)
+        self.db_conn = sqlite.connect(os.path.join(path, 'custom_streams.db'))
+        curs = self.db_conn.cursor()
+        curs.execute("""create table if not exists custom_streams (
+            id integer primary key,
+            name text,
+            url text,
+            icon text
+        )""")
+        
+        self.db_conn.commit()
         
         
     def get_url(self,urldata):
@@ -31,6 +47,115 @@ class WorldNewsLivePlugin(object):
         """
         return "%s?%s" % (self.script_url, urllib.urlencode(urldata,1))
 
+    
+    def action_add_custom_stream(self):
+        
+        name = self.get_modal_keyboard_input("Untitled Stream", "Enter a name for the new Stream")
+        if name:
+            url = self.get_modal_keyboard_input("rtmp://", "Enter the full Stream URL")
+            if url:
+                icon = self.get_modal_keyboard_input("", "(Optional) Icon Path/URL")
+                curs = self.db_conn.cursor()
+                curs.execute("insert into custom_streams (name, url, icon) VALUES (?, ?, ?);", (name, url, icon))
+                self.db_conn.commit()
+        return xbmc.executebuiltin("Container.Refresh")
+            
+    def action_import_custom_streams(self):
+        xmlfile = self.get_dialog().browse(1, "XML File Containing Stream Definitions", 'files')
+        soup = BeautifulStoneSoup(open(xmlfile))
+        curs = self.db_conn.cursor()
+        
+        for item in soup.findAll('item'):
+            print item
+            url = item.link.contents[0].strip()
+            name = item.title.contents[0].strip()
+            icon = item.thumbnail.contents[0].strip()
+            curs.execute("select * from custom_streams where name = ?", (name,))
+            if curs.fetchall():
+                self.get_dialog().ok('Skipping "%s"', "'%s' already exists in the database")
+            else:
+                curs.execute("insert into custom_streams (name, url, icon) VALUES (?, ?, ?);", (name,url, icon))
+                self.db_conn.commit()
+        return xbmc.executebuiltin("Container.Refresh")
+            
+        
+    def action_play_custom_stream(self):
+        self.set_stream_url(self.args['stream_url'])
+        
+    def action_browse_custom_streams(self):
+        self.add_list_item({'Title': '[Add New Stream]', 'action': 'add_custom_stream'})
+        self.add_list_item({'Title': '[Import Streams from XML]', 'action': 'import_custom_streams'})
+        curs = self.db_conn.cursor()
+        curs.execute("select id, name, url, icon from custom_streams")
+        for row in curs.fetchall():
+            data = {}
+            data.update(self.args)
+            data['action'] = 'play_custom_stream'
+            data['stream_url'] = row[2]
+            data['Title'] = row[1]
+            data['Thumb'] = row[3]
+            
+            edit_url_url = self.get_url({'action': 'edit_stream_url','id': row[0]})
+            edit_name_url = self.get_url({'action': 'edit_stream_name','id': row[0]})
+            edit_icon_url = self.get_url({'action': 'edit_stream_icon','id': row[0]})
+            delete_stream_url = self.get_url({'action': 'delete_stream','id': row[0]})
+            
+            cmi = [
+                ("Edit Stream URL", "XBMC.RunPlugin(%s)" % (edit_url_url,)),
+                ("Edit Stream Name", "XBMC.RunPlugin(%s)" % (edit_name_url,)),
+                ("Edit Stream Icon", "XBMC.RunPlugin(%s)" % (edit_icon_url,)),
+                ("Delete Stream", "XBMC.RunPlugin(%s)" % (delete_stream_url,))
+            ]
+            
+            self.add_list_item(data, context_menu_items=cmi, clear_context_menu=True, is_folder=False)
+        self.end_list()
+
+    def get_custom_stream(self, id):
+        curs = self.db_conn.cursor()
+        curs.execute("select id, name, url, icon from custom_streams where id = ?", (int(id),))
+        row = curs.fetchall()[0]
+        return {'id': row[0], 'name': row[1], 'url': row[2], 'icon': row[3]}
+
+    def save_custom_stream(self, stream):
+        curs = self.db_conn.cursor()
+        curs.execute("update custom_streams set name=?, url=?, icon=? where id=?", (stream['name'], stream['url'], stream['icon'], stream['id']))
+        self.db_conn.commit()
+        
+    def action_edit_stream_url(self):
+        stream = self.get_custom_stream(self.args['id'])
+        new = self.get_modal_keyboard_input(stream['url'], "Stream URL")
+        if new is not None:
+            stream['url'] = new
+            self.save_custom_stream(stream)
+        return xbmc.executebuiltin("Container.Refresh")
+        
+
+    def action_edit_stream_name(self):
+        stream = self.get_custom_stream(self.args['id'])
+        new = self.get_modal_keyboard_input(stream['name'], "Stream Name")
+        if new is not None:
+            stream['name'] = new
+            self.save_custom_stream(stream)
+        return xbmc.executebuiltin("Container.Refresh")
+        
+                        
+    def action_edit_stream_icon(self):
+        stream = self.get_custom_stream(self.args['id'])
+        new = self.get_modal_keyboard_input(stream['icon'], "Icon Path/URL")
+        if new is not None:
+            stream['icon'] = new
+            self.save_custom_stream(stream)
+        return xbmc.executebuiltin("Container.Refresh")
+        
+    def action_delete_stream(self):
+        ok = self.get_dialog().yesno("Are you Sure?", "Are you sure you want to delete this custom stream?")
+        if ok:
+            curs = self.db_conn.cursor()
+            curs.execute("delete from custom_streams where id = ?", (int(self.args['id']),))
+            self.db_conn.commit()
+        return xbmc.executebuiltin("Container.Refresh")
+
+        
     def action_channel_list(self):
         """
         List all registered Channels
@@ -39,6 +164,7 @@ class WorldNewsLivePlugin(object):
         and being subclasses of BaseChannel.
         
         """
+        self.add_list_item({'Title': '[My Custom Streams]', 'action':'browse_custom_streams'})
         minimum = int(self.get_setting("worst_channel_support"))
         for channel_code, channel_class in sorted(ChannelMetaClass.registry.channels.iteritems()):
             info = channel_class.get_channel_entry_info()
@@ -236,7 +362,7 @@ class WorldNewsLivePlugin(object):
         else:
             self.querystring = querystring
             self.args = {}
-        
+        self.connect_to_db()
         logging.debug("Constructed Plugin %s" % (self.__dict__,))
         
 if __name__ == '__main__':
