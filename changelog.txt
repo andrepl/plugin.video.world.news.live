@@ -1,0 +1,1 @@
+0.0.1 - initial release.  supports al-jazeera english, cnn and cspan
