@@ -16,7 +16,7 @@ class RT(BaseChannel):
         self.plugin.add_list_item(data, is_folder=False)
         data.update({'action': 'play_stream', 'Title': 'Standard Definition', 'stream_url': 'rtmp://livestfslivefs.fplive.net/livestfslive-live/ playpath=aljazeera_ar_high app=aljazeeraflashlive-live swfVfy=true live=true'})
         self.plugin.add_list_item(data, is_folder=False)
-        data.update({'action': 'play_stream', 'Title': 'Low Quality', 'stream_url': 'rtmp://livestfslivefs.fplive.net/livestfslive-live/ playpath=aljazeera_ar_low app=aljazeeraflashlive-live swfVfy=true live=true'})
+        data.update({'action': 'play_stream', 'Title': 'Low Definition', 'stream_url': 'rtmp://livestfslivefs.fplive.net/livestfslive-live/ playpath=aljazeera_ar_low app=aljazeeraflashlive-live swfVfy=true live=true'})
         self.plugin.add_list_item(data, is_folder=False)
         self.plugin.end_list()
 
