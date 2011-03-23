@@ -1,3 +1,5 @@
+1.2.2 - Added Al-Jazeera English with multiple definitions sub-menu
+
 1.2.1 - Fixed Type-o
 
 1.2.0 - Added a bunch more channels
