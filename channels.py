@@ -3,6 +3,26 @@ import simplejson
 from channel import BaseChannel, ChannelException,ChannelMetaClass, STATUS_BAD, STATUS_GOOD, STATUS_UGLY
 from utils import *
 
+class RT(BaseChannel):
+    playable = False
+    short_name = 'aljazeera_ar'
+    long_name = 'Al-Jazeera Live (Arabic)'
+    default_action = 'list_streams'
+    
+    def action_list_streams(self):
+        data = {}
+        data.update(self.args)
+        data.update({'action': 'play_stream', 'Title': 'High Definition', 'stream_url': 'rtmp://livestfslivefs.fplive.net/livestfslive-live/ playpath=aljazeera_ar_veryhigh app=aljazeeraflashlive-live swfVfy=true live=true'})
+        self.plugin.add_list_item(data, is_folder=False)
+        data.update({'action': 'play_stream', 'Title': 'Standard Definition', 'stream_url': 'rtmp://livestfslivefs.fplive.net/livestfslive-live/ playpath=aljazeera_ar_high app=aljazeeraflashlive-live swfVfy=true live=true'})
+        self.plugin.add_list_item(data, is_folder=False)
+        data.update({'action': 'play_stream', 'Title': 'Low Quality', 'stream_url': 'rtmp://livestfslivefs.fplive.net/livestfslive-live/ playpath=aljazeera_ar_low app=aljazeeraflashlive-live swfVfy=true live=true'})
+        self.plugin.add_list_item(data, is_folder=False)
+        self.plugin.end_list()
+
+    def action_play_stream(self):        
+        self.plugin.set_stream_url(self.args['stream_url'])
+
 class AlJazeeraLive(BaseChannel):
     playable = True
     short_name = 'aljazeera'
