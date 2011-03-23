@@ -134,7 +134,7 @@ class CNN(BaseChannel):
         self.plugin.add_list_item(data, is_folder=False)
         data.update({'stream_url': "rtmp://cp44679.live.edgefcs.net/live/cnn_stream3_low@2796", 'stream_number': 3, 'Title': 'CNN 3'})
         self.plugin.add_list_item(data, is_folder=False)        
-        data.update({'stream_url': "rtmp://cp44679.live.edgefcs.net/live/cnn_stream4_low@2797", 'stream_number': 4, 'Title': 'CNN 3'})
+        data.update({'stream_url': "rtmp://cp44679.live.edgefcs.net/live/cnn_stream4_low@2797", 'stream_number': 4, 'Title': 'CNN 4'})
         self.plugin.add_list_item(data, is_folder=False)
         self.plugin.end_list()
         

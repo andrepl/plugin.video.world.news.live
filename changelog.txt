@@ -1,3 +1,9 @@
+1.2.1 - Fixed Type-o
+
+1.2.0 - Added a bunch more channels
+
+1.1.0 - added custom stream support
+
 1.0.0 - fixed version number bug.
 
 0.0.1 - initial release.  supports al-jazeera english, cnn and cspan

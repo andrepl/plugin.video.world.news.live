@@ -16,7 +16,7 @@ __plugin__ = "World News Live"
 __author__ = 'Andre <andrepleblanc@gmail.com>'
 __url__ = 'http://github.com/andrepl/plugin.video.world.news.live/'
 __date__ = '03-21-2011'
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 __settings__ = xbmcaddon.Addon(id='plugin.video.world.news.live')
 
 
