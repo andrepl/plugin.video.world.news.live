@@ -1,3 +1,5 @@
+1.2.2 - replaced ABC24 Logo
+
 1.2.1 - Fixed Type-o
 
 1.2.0 - Added a bunch more channels
