@@ -15,8 +15,8 @@ except:
 __plugin__ = "World News Live"
 __author__ = 'Andre <andrepleblanc@gmail.com>'
 __url__ = 'http://github.com/andrepl/plugin.video.world.news.live/'
-__date__ = '03-28-2011'
-__version__ = '1.2.2'
+__date__ = '03-31-2011'
+__version__ = '1.2.3'
 __settings__ = xbmcaddon.Addon(id='plugin.video.world.news.live')
 
 
